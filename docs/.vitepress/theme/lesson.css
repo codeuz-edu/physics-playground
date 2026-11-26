@@ -1,0 +1,92 @@
+/* Lesson pages (docs/sims/…): the blocks the lesson Markdown uses besides plain Markdown.
+   They carry the classes of the old lesson HTML, so a lesson reads the same as before. */
+
+/* The key formulas of a lesson, as a table: one row per formula, its name on the left and the
+   formula on the right, a rule between rows. In the Markdown each row is a paragraph holding
+   <span class="eq-label">name</span><span class="eq-body">$formula$</span>; a row without a name
+   (or a statement in words) spans the whole width. On a phone the name sits above the formula. */
+.vp-doc .eq-block {
+ margin: 20px 0 28px;
+ border: 1px solid var(--vp-c-divider);
+ border-radius: 8px;
+ background: var(--vp-c-bg-soft);
+ overflow: hidden;
+}
+.vp-doc .eq-block > p {
+ display: grid;
+ grid-template-columns: minmax(0, 13.5rem) minmax(0, 1fr);
+ align-items: center;
+ column-gap: 28px;
+ margin: 0;
+ padding: 16px 22px;
+ line-height: 1.6;
+}
+.vp-doc .eq-block > p + p { border-top: 1px solid var(--vp-c-divider); }
+.vp-doc .eq-label {
+ font-size: 14px;
+ font-weight: 600;
+ line-height: 1.45;
+ color: var(--vp-c-text-2);
+}
+.vp-doc .eq-body {
+ min-width: 0;
+ overflow-x: auto;
+ overflow-y: hidden;
+ font-size: 1.12em;
+ color: var(--vp-c-text-1);
+}
+.vp-doc .eq-body:only-child { grid-column: 1 / -1; }
+@media (max-width: 640px) {
+ .vp-doc .eq-block > p { grid-template-columns: minmax(0, 1fr); row-gap: 6px; padding: 14px 16px; }
+}
+
+/* On a phone some formulas are wider than the column. The formula itself cannot scroll without moving
+   off the text baseline, so the paragraph or list that holds it scrolls sideways instead of the page. */
+.vp-doc p:has(> mjx-container),
+.vp-doc ol:has(mjx-container),
+.vp-doc ul:has(mjx-container) {
+ overflow-x: auto;
+ overflow-y: hidden;
+}
+
+/* A side remark, such as which parameters can be changed while a run is going. */
+.vp-doc .lesson-note p {
+ font-size: 14px;
+ line-height: 1.6;
+ color: var(--vp-c-text-2);
+}
+
+/* "darhol": the mark of a parameter that takes effect at once, as the lab shows it. */
+.vp-doc .param-tag {
+ display: inline-block;
+ padding: 0 6px;
+ border: 1px solid var(--vp-c-brand-1);
+ border-radius: 4px;
+ font-size: 10px;
+ line-height: 1.6;
+ letter-spacing: .08em;
+ text-transform: uppercase;
+ vertical-align: middle;
+ color: var(--vp-c-brand-1);
+}
+
+/* Lesson photos: side by side when there is room. A portrait photo (class "tall") stays narrow. */
+.vp-doc .lesson-photos {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+ gap: 24px;
+ align-items: start;
+ margin: 24px 0;
+}
+.vp-doc .lesson-photos .sim-photo { margin: 0; }
+.vp-doc .sim-photo.tall { max-width: 380px; }
+/* A caption that holds formulas is written as Markdown in the photo's slot, which makes it a paragraph. */
+.vp-doc .sim-photo figcaption p {
+ display: inline;
+ margin: 0;
+ line-height: inherit;
+}
+
+/* The worked solution inside a problem. */
+.vp-doc .sim-example .details ol { margin: 8px 0 12px; }
+.vp-doc .sim-example .details li + li { margin-top: 8px; }

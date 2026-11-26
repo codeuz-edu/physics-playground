@@ -1,0 +1,193 @@
+/* The site's look: the "Industry" design system of the original Fizika maydonçasi (its industry.css
+   and the dark values of the original app), mapped onto VitePress's theme variables so the site chrome,
+   the contents page (home.css) and the lab (lab.css) read as one product. Barlow for text, Barlow
+   Condensed 600 for headings (both self-hosted, imported in theme/index.js), a grey ground, a steel-blue
+   accent, hairline borders and square corners. */
+
+/* ---------- Industry tokens: light ---------- */
+:root {
+ --color-bg: #f2f2f3;
+ --color-surface: #e9e9ea;
+ --color-text: #1d1f20;
+ --color-accent: #5980a6;
+ --color-accent-2: #728fab;
+ --color-divider: color-mix(in srgb, #1d1f20 16%, transparent);
+
+ --color-neutral-100: #f5f5f8;
+ --color-neutral-200: #e7e7ea;
+ --color-neutral-300: #d4d4d7;
+ --color-neutral-400: #b7b7ba;
+ --color-neutral-500: #98989b;
+ --color-neutral-600: #7a7a7d;
+ --color-neutral-700: #5d5d60;
+ --color-neutral-800: #424244;
+ --color-neutral-900: #2b2b2d;
+
+ --color-accent-100: #eef6ff;
+ --color-accent-200: #d6ebff;
+ --color-accent-300: #b5d9fd;
+ --color-accent-400: #94bce3;
+ --color-accent-500: #749dc4;
+ --color-accent-600: #597ea3;
+ --color-accent-700: #416180;
+ --color-accent-800: #2c455d;
+ --color-accent-900: #1d2d3d;
+
+ --color-accent-2-100: #eef6ff;
+ --color-accent-2-200: #d6ebff;
+ --color-accent-2-300: #bdd8f2;
+ --color-accent-2-400: #9ebbd8;
+ --color-accent-2-500: #7e9cb8;
+ --color-accent-2-600: #627d98;
+ --color-accent-2-700: #486077;
+ --color-accent-2-800: #314457;
+ --color-accent-2-900: #1f2d3a;
+
+ --font-heading: "Barlow Condensed", system-ui, sans-serif;
+ --font-heading-weight: 600;
+ --font-body: "Barlow", system-ui, sans-serif;
+
+ --radius-sm: 2px;
+ --radius-md: 4px;
+ --radius-lg: 7px;
+ --shadow-sm: 0 1px 2px color-mix(in srgb, #2b2b2d 14%, transparent);
+ --shadow-md: 0 3px 10px color-mix(in srgb, #2b2b2d 16%, transparent);
+ --shadow-lg: 0 12px 32px color-mix(in srgb, #2b2b2d 22%, transparent);
+}
+
+/* ---------- Industry tokens: dark (the ramps turned round for a dark ground) ---------- */
+.dark {
+ --color-bg: #16191c;
+ --color-surface: #1f2327;
+ --color-text: #e8e9ea;
+ --color-accent: #749dc4;
+ --color-divider: color-mix(in srgb, #e8e9ea 16%, transparent);
+
+ --color-accent-100: #1d2d3d;
+ --color-accent-200: #2c455d;
+ --color-accent-300: #416180;
+ --color-accent-400: #597ea3;
+ --color-accent-500: #749dc4;
+ --color-accent-600: #94bce3;
+ --color-accent-700: #94bce3;
+ --color-accent-800: #b5d9fd;
+ --color-accent-900: #d6ebff;
+
+ --color-neutral-100: #2b2b2d;
+ --color-neutral-200: #2b2b2d;
+ --color-neutral-300: #424244;
+ --color-neutral-400: #5d5d60;
+ --color-neutral-500: #7a7a7d;
+ --color-neutral-600: #98989b;
+ --color-neutral-700: #b7b7ba;
+ --color-neutral-800: #d4d4d7;
+ --color-neutral-900: #e7e7ea;
+
+ --shadow-sm: 0 1px 2px rgba(0, 0, 0, .5);
+ --shadow-md: 0 3px 10px rgba(0, 0, 0, .5);
+ --shadow-lg: 0 12px 32px rgba(0, 0, 0, .6);
+}
+
+/* ---------- VitePress variables from the tokens ---------- */
+:root {
+ --vp-c-bg: #f2f2f3;
+ --vp-c-bg-alt: #e9e9ea;
+ --vp-c-bg-soft: #e9e9ea;
+ --vp-c-bg-elv: #f5f5f8;
+ --vp-c-text-1: #1d1f20;
+ --vp-c-text-2: #424244;
+ --vp-c-text-3: #6b6b6e;
+ --vp-c-divider: #d4d4d7;
+ --vp-c-gutter: #dcdcdf;
+ --vp-c-border: #b7b7ba;
+ /* Links and active items in accent-700 (5.8:1 on the ground); filled buttons in it too, so white
+    text on them stays readable (6.5:1). The accent itself is the hover colour. */
+ --vp-c-brand-1: #416180;
+ --vp-c-brand-2: #5980a6;
+ --vp-c-brand-3: #416180;
+ --vp-c-brand-soft: rgba(89, 128, 166, .14);
+ --vp-font-family-base: "Barlow", ui-sans-serif, system-ui, sans-serif;
+ --vp-nav-logo-height: 36px;
+ --vp-sidebar-width: 288px;
+}
+.dark {
+ --vp-c-bg: #16191c;
+ --vp-c-bg-alt: #111316;
+ --vp-c-bg-soft: #1f2327;
+ --vp-c-bg-elv: #1f2327;
+ --vp-c-text-1: #e8e9ea;
+ --vp-c-text-2: #b7b7ba;
+ --vp-c-text-3: #8a8a8d;
+ --vp-c-divider: #34373b;
+ --vp-c-gutter: #0c0e10;
+ --vp-c-border: #424244;
+ --vp-c-brand-1: #94bce3;
+ --vp-c-brand-2: #749dc4;
+ --vp-c-brand-3: #416180;
+ --vp-c-brand-soft: rgba(116, 157, 196, .16);
+}
+
+/* Reserve the scrollbar's space so opening the search box (which locks page scrolling) does not
+   shift the page sideways. No effect with overlay scrollbars. */
+html { scrollbar-gutter: stable; background-color: var(--vp-c-bg); }
+::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* ---------- Headings: Barlow Condensed 600 ---------- */
+.vp-doc h1, .vp-doc h2, .vp-doc h3, .vp-doc h4, .vp-doc h5, .vp-doc h6 {
+ font-family: var(--font-heading);
+ font-weight: var(--font-heading-weight);
+ letter-spacing: -.015em;
+}
+.vp-doc h1 { font-size: 42px; line-height: 1.08; }
+.vp-doc h2 { font-size: 30px; line-height: 1.15; }
+.vp-doc h3 { font-size: 23px; line-height: 1.2; }
+.vp-doc h4 { font-size: 19px; }
+@media (max-width: 640px) {
+ .vp-doc h1 { font-size: 34px; }
+ .vp-doc h2 { font-size: 26px; }
+}
+.vp-doc p, .vp-doc li { line-height: 1.75; }
+
+/* ---------- Header ---------- */
+.VPNavBar .VPNavBarTitle .title { font-family: var(--font-heading); font-weight: 600; font-size: 21px; letter-spacing: -.01em; }
+.VPNavBar .VPNavBarMenuLink, .VPNavBar .VPNavBarMenuGroup .text { font-weight: 500; }
+
+/* ---------- Sidebar: the two sections (simulations, reference) are small labels; the chapters
+   inside read as headings. ---------- */
+.VPSidebar .VPSidebarItem.level-0 > .item > .text {
+ font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--vp-c-text-2);
+}
+.VPSidebar .VPSidebarItem.level-1.collapsible > .item .text { font-weight: 600; color: var(--vp-c-text-1); }
+
+/* ---------- Square, hairline-framed blocks, as in Industry ---------- */
+.vp-doc .custom-block, .vp-doc div[class*='language-'], .vp-doc table { border-radius: 0; }
+.VPNavBarSearch .DocSearch-Button { border-radius: var(--radius-md); }
+/* Search: VitePress leaves #local-search content-sized, so the box is short. As on the other codeuz-edu
+   sites, let it fill the space the nav already reserves, capped so it does not span the whole bar. */
+@media (min-width: 768px) {
+  .VPNavBarSearch #local-search { flex: 1; max-width: 280px; }
+  /* The button is left-aligned, so the shortcut keys sit at its end instead of next to the label. */
+  .VPNavBarSearch .DocSearch-Button-Keys { margin-left: auto; }
+}
+
+/* Industry's blueprint frame: a hairline box with registration marks at its corners. Put four
+   <i class="corner tl|tr|bl|br"></i> inside an element with the class "blueprint". */
+.blueprint { position: relative; border: 1px solid var(--color-divider); border-radius: 0; }
+.blueprint > .corner { position: absolute; width: 11px; height: 11px; color: color-mix(in srgb, var(--color-text) 55%, transparent); pointer-events: none; }
+.blueprint > .corner::before, .blueprint > .corner::after { content: ""; position: absolute; background: currentColor; }
+.blueprint > .corner::before { left: 5px; top: 0; width: 1px; height: 100%; }
+.blueprint > .corner::after { top: 5px; left: 0; width: 100%; height: 1px; }
+.blueprint > .corner.tl { top: -6px; left: -6px; }
+.blueprint > .corner.tr { top: -6px; right: -6px; }
+.blueprint > .corner.bl { bottom: -6px; left: -6px; }
+.blueprint > .corner.br { bottom: -6px; right: -6px; }
+
+/* ---------- Lesson components (SimPhoto.vue, SimExample.vue) ---------- */
+.sim-photo { margin: 1.5rem 0; }
+.sim-photo img { width: 100%; height: auto; }
+.sim-photo figcaption { margin-top: .5rem; font-size: .9rem; color: var(--vp-c-text-2); }
+.sim-photo figcaption small { display: block; margin-top: .25rem; }
+.sim-example { margin: 1rem 0 1.5rem; padding: 0 1rem 1rem; border-left: 3px solid var(--vp-c-brand-1); }
+.sim-example-run { margin-top: .5rem; padding: .35rem .9rem; border: 1px solid var(--vp-c-brand-1); color: var(--vp-c-brand-1); font-family: var(--font-heading); font-weight: 600; font-size: 15px; }
+.sim-example-run:hover { background: var(--vp-c-brand-soft); }

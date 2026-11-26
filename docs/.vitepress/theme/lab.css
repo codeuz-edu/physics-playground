@@ -1,0 +1,462 @@
+/* The simulation lab (SimLab.vue, LabPanel.vue). Everything is scoped under .sim-lab; the lab keeps the
+   look of the old app (the Industry design system: Barlow, square hairline controls, a steel accent).
+   Colours are custom properties on .sim-lab, light by default and dark under VitePress's html.dark;
+   the canvas palette (--bg … --hot, --halo) is read by the lab with readColors (src/ui/canvas.js). */
+/* Fonts: Barlow 400/500/700 and Barlow Condensed 600 come from theme/index.js (@fontsource). */
+
+/* ---------- tokens ---------- */
+.sim-lab {
+  --lab-bg: #f2f2f3;
+  --lab-surface: #e9e9ea;
+  --lab-text: #1d1f20;
+  --lab-accent: #5980a6;
+  --lab-divider: color-mix(in srgb, #1d1f20 16%, transparent);
+  --lab-hairline: color-mix(in srgb, var(--lab-text) 8%, transparent);
+  --lab-n-100: #f5f5f8; --lab-n-200: #e7e7ea; --lab-n-300: #d4d4d7; --lab-n-400: #b7b7ba; --lab-n-500: #98989b;
+  --lab-n-600: #7a7a7d; --lab-n-700: #5d5d60; --lab-n-800: #424244; --lab-n-900: #2b2b2d;
+  --lab-a-100: #eef6ff; --lab-a-200: #d6ebff; --lab-a-300: #b5d9fd; --lab-a-400: #94bce3; --lab-a-500: #749dc4;
+  --lab-a-600: #597ea3; --lab-a-700: #416180; --lab-a-800: #2c455d; --lab-a-900: #1d2d3d;
+  --lab-shadow-sm: 0 1px 2px color-mix(in srgb, #2b2b2d 14%, transparent);
+  --lab-shadow-md: 0 3px 10px color-mix(in srgb, #2b2b2d 16%, transparent);
+  --lab-font-heading: "Barlow Condensed", system-ui, sans-serif;
+  --lab-font-body: "Barlow", system-ui, sans-serif;
+  --lab-font-symbol: "Times New Roman", "STIX Two Text", Georgia, serif;
+  /* Canvas text (a canvas cannot resolve CSS variables, so these are plain font lists; see refreshFonts). */
+  --font-body: Barlow, sans-serif;
+  --font-mono: Barlow, sans-serif;
+
+  /* Canvas palette: Industry ground and ink, the steel accent for position, muted data hues for the rest. */
+  --bg: #f2f2f3; --surface: #f2f2f3; --fg: #1d1f20; --muted: #5d5d60; --line: #d4d4d7; --grid: rgba(89,128,166,0.16); --axis: #7a7a7d;
+  --accent: #5980a6; --pos: #5980a6; --vel: #c2652e; --acc: #b04a7e; --vx: #b08a2c; --vy: #6f5aa8; --current: #2f8a9e; --force: #3f8a5a; --friction: #8a5a2b;
+  --body: #1d2d3d; --track: #e7e7ea; --ghost: #98989b; --warn: #c2414b; --sky-top: #f2f2f3; --sky-bottom: #f2f2f3; --ground: #e7e7ea; --ground-edge: #1d1f20;
+  --hatch: #7a7a7d; --road: #2b2b2d; --shadow: rgba(29,31,32,0.18); --ball-hi: #ffffff; --iron: #5d5d60; --iron-hi: #d4d4d7; --iron-dark: #2b2b2d;
+  --water: #e3eef8; --water-line: #94bce3; --dot: #d4d4d7; --gridline: #e7e7ea; --cursor: #416180; --hot: #d6ebff;
+  --halo: rgba(255, 255, 255, 0.92);
+}
+.dark .sim-lab {
+  --lab-bg: #16191c;
+  --lab-surface: #1f2327;
+  --lab-text: #e8e9ea;
+  --lab-accent: #749dc4;
+  --lab-divider: color-mix(in srgb, #e8e9ea 16%, transparent);
+  --lab-n-100: #2b2b2d; --lab-n-200: #2b2b2d; --lab-n-300: #424244; --lab-n-400: #5d5d60; --lab-n-500: #7a7a7d;
+  --lab-n-600: #98989b; --lab-n-700: #b7b7ba; --lab-n-800: #d4d4d7; --lab-n-900: #e7e7ea;
+  --lab-a-100: #1d2d3d; --lab-a-200: #2c455d; --lab-a-300: #416180; --lab-a-400: #597ea3; --lab-a-500: #749dc4;
+  --lab-a-600: #94bce3; --lab-a-700: #94bce3; --lab-a-800: #b5d9fd; --lab-a-900: #d6ebff;
+  --lab-shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+  --lab-shadow-md: 0 3px 10px rgba(0,0,0,0.5);
+
+  --bg: #16191c; --surface: #16191c; --fg: #e8e9ea; --muted: #b7b7ba; --line: #424244; --grid: rgba(148,188,227,0.14); --axis: #98989b;
+  --accent: #749dc4; --pos: #749dc4; --vel: #e08a55; --acc: #d77aa6; --vx: #d4ae55; --vy: #9d8ad6; --current: #5bb4c7; --force: #6cba86; --friction: #c08a55;
+  --body: #d6ebff; --track: #2b2b2d; --ghost: #7a7a7d; --warn: #e0636b; --sky-top: #16191c; --sky-bottom: #16191c; --ground: #202428; --ground-edge: #e8e9ea;
+  --hatch: #5d5d60; --road: #b7b7ba; --shadow: rgba(0,0,0,0.45); --ball-hi: #ffffff; --iron: #98989b; --iron-hi: #424244; --iron-dark: #d4d4d7;
+  --water: #1b2a38; --water-line: #416180; --dot: #424244; --gridline: #2b2b2d; --cursor: #94bce3; --hot: #2c455d;
+  --halo: rgba(22, 25, 28, 0.92);
+}
+
+/* ---------- room on the page ----------
+   A page with a lab gives it the whole main area beside the site sidebar: the outline column (VitePress
+   shows it from 1280 px) gives way, and the lab breaks out of the text column to the width of .VPDoc's
+   container (container units) plus most of its side padding. The lesson text below keeps a readable
+   column of about 720 px. On phones the lab runs edge to edge. Each rule is written twice: with :has(),
+   which works from the server-rendered HTML (no jump on first load), and with html.has-sim-lab, which the
+   lab sets while it is mounted, for browsers without :has(). Leaving the page undoes both. */
+.VPDoc:has(.sim-lab) > .container { container: sim-page / inline-size; }
+html.has-sim-lab .VPDoc > .container { container: sim-page / inline-size; }
+.VPDoc.VPDoc:has(.sim-lab) .content .content-container { max-width: 720px; }
+html.has-sim-lab .VPDoc.VPDoc .content .content-container { max-width: 720px; }
+@media (min-width: 768px) {
+  .VPDoc.VPDoc:has(.sim-lab) { padding-top: 24px; }
+  html.has-sim-lab .VPDoc.VPDoc { padding-top: 24px; }
+}
+@media (min-width: 1280px) {
+  .VPDoc.VPDoc:has(.sim-lab) .aside { display: none; }
+  html.has-sim-lab .VPDoc.VPDoc .aside { display: none; }
+}
+/* Full window: the lab is fixed over everything; the page behind does not scroll. The page container's
+   size containment would make it the lab's containing block, so it is lifted while the lab fills the window. */
+html.lab-full-open, html.lab-full-open body { overflow: hidden; }
+html.lab-full-open { scrollbar-gutter: auto; } /* the lab covers the whole window, the scrollbar's place too */
+html.lab-full-open .VPDoc > .container { container-type: normal !important; }
+
+/* ---------- the frame ---------- */
+.sim-lab {
+  container: lab / inline-size;
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: calc(100cqw + 32px);
+  margin: 16px calc((100% - 100cqw) / 2 - 16px) 40px;
+  border: 1px solid var(--lab-divider);
+  background: var(--lab-bg);
+  color: var(--lab-text);
+  font-family: var(--lab-font-body);
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  /* Scrolled to (a worked problem's button): just below the bars that stay at the top of the window. */
+  scroll-margin-top: 56px;
+}
+@media (min-width: 960px) { .sim-lab { scroll-margin-top: calc(var(--vp-nav-height, 64px) + 56px); } }
+@media (min-width: 1280px) { .sim-lab { scroll-margin-top: calc(var(--vp-nav-height, 64px) + 8px); } }
+.sim-lab:focus { outline: none; }
+.sim-lab *, .sim-lab *::before, .sim-lab *::after { box-sizing: border-box; }
+.sim-lab :focus-visible { outline: 2px solid var(--lab-accent); outline-offset: 2px; }
+.sim-lab ::selection { background: color-mix(in srgb, var(--lab-accent) 30%, transparent); }
+@media (max-width: 767px) {
+  .sim-lab { width: calc(100cqw + 48px); margin-inline: calc((100% - 100cqw) / 2 - 24px); border-inline: 0; }
+  .sim-lab > .corner { display: none; }
+}
+/* Registration marks at the corners (the old app's .blueprint frame). */
+.sim-lab .corner { position: absolute; z-index: 1; width: 11px; height: 11px; color: color-mix(in srgb, var(--lab-text) 55%, transparent); pointer-events: none; }
+.sim-lab .corner::before, .sim-lab .corner::after { content: ""; position: absolute; background: currentColor; }
+.sim-lab .corner::before { left: 5px; top: 0; width: 1px; height: 100%; }
+.sim-lab .corner::after { top: 5px; left: 0; width: 100%; height: 1px; }
+.sim-lab .corner.tl { top: -6px; left: -6px; }
+.sim-lab .corner.tr { top: -6px; right: -6px; }
+.sim-lab .corner.bl { bottom: -6px; left: -6px; }
+.sim-lab .corner.br { bottom: -6px; right: -6px; }
+
+/* ---------- the lab on the page ----------
+   A block as tall as the window below the site's bars: time controls, readouts, stage, status line. The
+   stage takes the height the others leave (SimLab's fitStage sets --lab-stage-h; the fallback here is for
+   the first paint). The settings and the graphs follow the block, so they never take the stage's height.
+   The settings button puts the settings beside the stage as the old app's card (.panel-float). */
+.sim-lab:not(.is-full) .lab-dock { display: contents; }
+.sim-lab:not(.is-full) .lab-dock > .corner { display: none; }
+.sim-lab:not(.is-full):not(.panel-float) .lab-panel > .corner { display: none; }
+.sim-lab .lab-controls { order: 1; }
+.sim-lab .lab-stage { position: relative; order: 2; display: flex; flex-direction: column; background: var(--lab-bg); }
+.sim-lab .lab-status { order: 3; }
+.sim-lab .lab-panel { order: 4; }
+.sim-lab .lab-graphs { order: 5; }
+/* No taller than the drawing needs, and on a wide screen never under 420 px (--scene-ar and --scene-pad come with the page; SimLab.vue). */
+.sim-lab .lab-canvas-box { position: relative; height: var(--lab-stage-h, clamp(240px, min(calc(100dvh - var(--vp-nav-height, 64px) - 196px), max(420px, calc(100cqw / var(--scene-ar, 0.5) + var(--scene-pad, 0px)))), 75cqw)); }
+.sim-lab .lab-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: manipulation; }
+.sim-lab .lab-panel { border-top: 1px solid var(--lab-divider); background: var(--lab-bg); }
+.sim-lab .lab-panel-empty { min-height: 200px; }
+/* Before the simulation arrives the readout strip is already drawn from the page's own data (SimLab.vue).
+   Only a page without that data reserves a fixed height instead. */
+.sim-lab:not(.is-ready) .lab-hud:not(:has(.lab-readouts)) { min-height: 74px; }
+@container lab (max-width: 639px) {
+  /* On a phone, no taller than the drawing needs (--scene-ar and --scene-pad come with the page; SimLab.vue). */
+  .sim-lab .lab-canvas-box { height: var(--lab-stage-h, clamp(240px, min(calc(100dvh - 310px), calc(100cqw / var(--scene-ar, 0.5) + var(--scene-pad, 0px))), 130cqw)); }
+}
+.sim-lab.panel-float .lab-canvas-box { margin-right: 362px; }
+.sim-lab.panel-float .lab-hud { padding-right: 362px; }
+.sim-lab.panel-float .lab-panel {
+  position: absolute; z-index: 5; top: var(--pf-top, 72px); right: 16px; height: var(--pf-h, 60vh); width: 330px;
+  display: flex; flex-direction: column; border: 1px solid var(--lab-divider); box-shadow: var(--lab-shadow-md);
+}
+
+/* ---------- readouts and the time chip ---------- */
+.sim-lab .lab-hud { display: flex; align-items: flex-start; gap: 8px 12px; padding: 12px 12px 0; min-height: 12px; }
+.sim-lab .lab-readouts {
+  margin: 0; flex: 0 0 auto; max-width: calc(100% - 216px); display: grid; grid-template-columns: var(--ro-wide);
+  background: var(--lab-bg); border: 1px solid var(--lab-divider); box-shadow: var(--lab-shadow-sm); pointer-events: auto;
+}
+.sim-lab .lab-ro {
+  min-width: 0; padding: 8px 14px; display: flex; flex-direction: column; justify-content: space-between; gap: 4px;
+  border-right: 1px solid var(--lab-divider); border-bottom: 1px solid var(--lab-divider); margin-bottom: -1px;
+}
+.sim-lab .lab-ro dt { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 12px; line-height: 1.2; letter-spacing: 0.02em; color: var(--lab-n-700); white-space: nowrap; }
+.sim-lab .lab-ro dd { margin: 0; display: flex; align-items: baseline; gap: 6px; }
+.sim-lab .lab-swatch { flex: none; width: 8px; height: 8px; }
+.sim-lab .lab-ro-label { min-width: 0; }
+/* Room for seven characters ("-123,45"), so the readout strip keeps its width while the numbers change. */
+.sim-lab .lab-ro-val { font-family: var(--lab-font-heading); font-weight: 400; font-size: 24px; line-height: 1.05; font-variant-numeric: tabular-nums; min-width: 7ch; white-space: nowrap; }
+/* Until the simulation writes a number, a dash keeps the line its final height. */
+.sim-lab .lab-ro-val:empty::before { content: "\2014"; }
+.sim-lab .lab-unit { font-size: 12px; color: var(--lab-n-700); }
+.sim-lab .lab-time { margin-left: auto; flex: none; display: flex; align-items: flex-start; gap: 6px; }
+.sim-lab .lab-chip {
+  display: flex; align-items: center; min-height: 32px; min-width: 104px; padding: 0 12px;
+  background: var(--lab-a-900); color: var(--lab-bg); font-family: var(--lab-font-heading); font-weight: 400; font-size: 16px;
+  font-variant-numeric: tabular-nums; letter-spacing: 0.02em; white-space: nowrap;
+}
+/* The state name sits to the left of the time chip, and the pair is anchored to the right edge: when
+   the name changes ("Tayyor", "Bormoqda", "Tugadi") only its own left edge moves, the chip stays put
+   and nothing can stick out of the lab. */
+.sim-lab .lab-state { order: -1; min-height: 32px; gap: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+.sim-lab .lab-state-dot { width: 6px; height: 6px; background: currentColor; }
+.sim-lab.is-narrow .lab-hud { padding: 8px 8px 0; }
+.sim-lab.is-narrow .lab-readouts { flex: 1 1 100%; max-width: none; grid-template-columns: var(--ro-narrow); }
+.sim-lab.is-narrow .lab-ro { padding: 6px 8px; }
+.sim-lab.is-narrow .lab-ro dt { align-items: flex-start; gap: 5px; white-space: normal; }
+.sim-lab.is-narrow .lab-swatch { margin-top: 3px; }
+.sim-lab.is-narrow .lab-ro-val { font-size: 18px; min-width: 0; } /* columns are fixed fractions here: no width to reserve */
+.sim-lab.is-narrow .lab-time { display: none; }
+/* The same phone layout by the lab's own width, without waiting for the script to add `is-narrow`:
+   the pre-rendered page on a phone is laid out right from the first paint. */
+@container lab (max-width: 639px) {
+  .sim-lab:not(.is-full) .lab-hud { padding: 8px 8px 0; }
+  .sim-lab:not(.is-full) .lab-readouts { flex: 1 1 100%; max-width: none; grid-template-columns: var(--ro-narrow); }
+  .sim-lab:not(.is-full) .lab-ro { padding: 6px 8px; }
+  .sim-lab:not(.is-full) .lab-ro dt { align-items: flex-start; gap: 5px; white-space: normal; }
+  .sim-lab:not(.is-full) .lab-swatch { margin-top: 3px; }
+  .sim-lab:not(.is-full) .lab-ro-val { font-size: 18px; min-width: 0; }
+  .sim-lab:not(.is-full) .lab-time { display: none; }
+}
+
+/* ---------- tags, buttons, inputs (Industry components) ---------- */
+.sim-lab .lab-tag { display: inline-flex; align-items: center; font-size: 11px; letter-spacing: 0.02em; padding: 3px 10px; border: 1px solid transparent; }
+.sim-lab .lab-tag.is-accent { background: var(--lab-a-100); color: var(--lab-a-800); }
+.sim-lab .lab-tag.is-neutral { background: var(--lab-n-100); color: var(--lab-n-800); }
+.sim-lab .lab-tag.is-outline { border-color: var(--lab-accent); color: var(--lab-accent); }
+.sim-lab .lab-btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin: 0;
+  padding: 6.8px 12.2px; border: 1px solid var(--lab-divider); border-radius: 0; background: transparent; color: var(--lab-text);
+  font-family: var(--lab-font-heading); font-weight: 600; font-size: 14px; line-height: 1.2; cursor: pointer; white-space: nowrap;
+}
+.sim-lab .lab-btn svg { display: block; flex: none; }
+.sim-lab .lab-btn:hover:enabled { background: color-mix(in srgb, var(--lab-text) 7%, transparent); }
+.sim-lab .lab-btn:active:enabled { background: color-mix(in srgb, var(--lab-text) 14%, transparent); }
+.sim-lab .lab-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.sim-lab .lab-btn:focus:not(:focus-visible) { outline: none !important; }
+.sim-lab .lab-btn-primary { background: var(--lab-accent); border-color: var(--lab-accent); color: var(--lab-bg); }
+.sim-lab .lab-btn-primary:hover:enabled { background: var(--lab-a-600); }
+.sim-lab .lab-btn-primary:active:enabled { background: var(--lab-a-700); }
+.sim-lab .lab-btn-ghost { border-color: transparent; color: var(--lab-accent); padding-inline: 4px; }
+.sim-lab .lab-btn-ghost:hover:enabled { background: color-mix(in srgb, var(--lab-accent) 10%, transparent); }
+.sim-lab .lab-btn-icon { width: 40px; height: 40px; padding: 0; }
+.sim-lab .lab-btn.is-on { background: var(--lab-a-100); }
+.sim-lab .lab-btn-small { align-self: flex-start; margin-top: 6px; min-height: 32px; font-size: 13px; }
+.sim-lab .lab-input {
+  width: 100%; min-height: 36px; margin: 0; padding: 6px 10px; border: 1px solid var(--lab-divider); border-radius: 0;
+  background: transparent; color: var(--lab-text); font: inherit; font-size: 14px; line-height: 1.4;
+}
+.sim-lab .lab-input:hover { border-color: color-mix(in srgb, var(--lab-text) 45%, transparent); }
+.sim-lab .lab-select { appearance: auto; -webkit-appearance: auto; cursor: pointer; }
+.sim-lab .lab-select option { background: var(--lab-bg); color: var(--lab-text); }
+.sim-lab input[type="range"] { accent-color: var(--lab-accent); cursor: pointer; margin: 0; background: transparent; }
+.sim-lab input[type="range"]:disabled { cursor: not-allowed; opacity: 0.5; }
+.sim-lab input[type="checkbox"] { accent-color: var(--lab-accent); width: 16px; height: 16px; margin: 0; flex: none; cursor: pointer; }
+.sim-lab .lab-sym { font-family: var(--lab-font-symbol); font-style: italic; }
+
+/* ---------- status line and time controls ---------- */
+/* The status line has a fixed height (two lines; three on a phone), whatever it says. Its text changes
+   during a run (hint, then the finish message), and the stage takes the height the other parts leave,
+   so a line that grew or shrank with its text would resize the picture in the middle of an experiment.
+   The text sits in a box anchored to the bottom of that line: a hint is cut to the line's height (a tap
+   opens it), a finish message is never cut, and a box taller than the line opens upward over the
+   bottom edge of the picture without moving anything. */
+.sim-lab .lab-status {
+  position: relative; height: 50px; cursor: default;
+  border-top: 1px solid var(--lab-divider); font-size: 14px; line-height: 1.3; color: var(--lab-n-700);
+}
+.sim-lab .lab-status-box {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; box-sizing: border-box; min-height: 100%;
+  display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: var(--lab-bg);
+}
+.sim-lab .lab-status.is-strong .lab-status-box, .sim-lab .lab-status.is-open .lab-status-box { box-shadow: 0 -1px 0 var(--lab-divider); }
+.sim-lab .lab-status-dot { flex: none; width: 8px; height: 8px; background: transparent; }
+.sim-lab .lab-status.is-strong { color: var(--lab-text); }
+.sim-lab .lab-status.is-strong .lab-status-dot { background: var(--lab-accent); }
+.sim-lab .lab-status.is-error .lab-status-dot { background: var(--lab-text); }
+.sim-lab .lab-status-text { flex: 1; min-width: 0; text-wrap: pretty; }
+.sim-lab .lab-status:not(.is-strong):not(.is-open) .lab-status-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+@container lab (max-width: 479px) {
+  .sim-lab:not(.is-full) .lab-status { height: 68px; }
+  .sim-lab:not(.is-full) .lab-status-box { padding: 6px 12px; }
+  .sim-lab:not(.is-full) .lab-status:not(.is-strong):not(.is-open) .lab-status-text { -webkit-line-clamp: 3; }
+}
+.sim-lab .lab-controls {
+  container: lab-ctl / inline-size;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 10px 14px; border-bottom: 1px solid var(--lab-divider);
+}
+.sim-lab.is-full .lab-controls { border-bottom: 0; border-top: 1px solid var(--lab-divider); }
+.sim-lab .lab-play { display: flex; gap: 8px; flex: 0 0 auto; }
+.sim-lab .lab-play-btn { min-height: 44px; min-width: 136px; font-size: 15px; letter-spacing: 0.04em; }
+.sim-lab .lab-break { display: none; order: 3; flex: 0 0 100%; height: 0; }
+.sim-lab .lab-scrub { flex: 1 1 160px; min-width: 120px; display: flex; align-items: center; gap: 10px; }
+.sim-lab .lab-scrub input { flex: 1; min-width: 0; height: 26px; }
+.sim-lab .lab-scrub-lbl { font-size: 12px; color: var(--lab-n-700); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sim-lab .lab-to-end { font-size: 13px; min-height: 30px; }
+.sim-lab .lab-seg { display: inline-flex; flex: none; border: 1px solid var(--lab-divider); }
+.sim-lab .lab-seg-opt {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 38px; padding: 0 8px;
+  font-size: 13px; font-variant-numeric: tabular-nums; cursor: pointer; user-select: none;
+}
+.sim-lab .lab-seg-opt + .lab-seg-opt { border-left: 1px solid var(--lab-divider); }
+.sim-lab .lab-seg-opt input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; pointer-events: none; }
+.sim-lab .lab-seg-opt:has(input:checked) { background: var(--lab-accent); color: var(--lab-bg); }
+.sim-lab .lab-seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--lab-text) 7%, transparent); }
+.sim-lab .lab-seg-opt:has(input:focus-visible) { outline: 2px solid var(--lab-accent); outline-offset: -2px; }
+.sim-lab .lab-tools { display: flex; gap: 6px; flex: none; }
+.sim-lab .lab-full-btn { min-height: 40px; min-width: 40px; padding: 0 12px; }
+.sim-lab.is-full .lab-full-btn { width: 40px; padding: 0; }
+.sim-lab.is-full .lab-link-btn { display: none; }
+/* Narrow: two rows. Play, step, reset and the tools on the first; the time scale and the speed below. */
+@container lab-ctl (max-width: 719px) {
+  .sim-lab .lab-break { display: block; }
+  .sim-lab .lab-play { flex: 1 1 auto; gap: 6px; }
+  .sim-lab .lab-play-btn { min-width: 104px; } /* the longest label ("Davom etiş") measures 103 px: the row neither shifts when the label changes nor wraps at 360 px */
+  .sim-lab .lab-play .lab-btn-icon, .sim-lab .lab-tools .lab-btn-icon { width: 38px; }
+  .sim-lab .lab-tools { order: 1; }
+  .sim-lab .lab-full-btn { width: 38px; padding: 0; }
+  .sim-lab .lab-full-label { display: none; }
+  .sim-lab .lab-scrub { order: 5; flex: 1 1 0; min-width: 96px; }
+  .sim-lab .lab-seg { order: 6; }
+  .sim-lab .lab-seg-opt { min-width: 38px; min-height: 36px; padding: 0 4px; }
+}
+@container lab (max-width: 719px) {
+  .sim-lab .lab-controls { row-gap: 6px; padding: 8px 10px; }
+  .sim-lab .lab-status { padding: 6px 12px; }
+}
+/* The keyboard shortcuts, on the status line of a wide lab on the page (in the panel in the full window),
+   only where there is a keyboard and a pointer that hovers. */
+.sim-lab .lab-keys { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12px; color: var(--lab-n-700); }
+.sim-lab .lab-keys > span { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.sim-lab .lab-keys kbd { font-family: var(--lab-font-body); font-size: 11px; padding: 1px 6px; border: 1px solid var(--lab-divider); border-bottom-width: 2px; }
+.sim-lab .lab-status .lab-keys { display: none; flex: none; flex-wrap: nowrap; margin-left: auto; }
+@container lab (min-width: 980px) { .sim-lab:not(.is-full) .lab-status .lab-keys { display: flex; } }
+.sim-lab:not(.is-full) .lab-hints { display: none; }
+@media (hover: none) { .sim-lab .lab-hints, .sim-lab .lab-status .lab-keys { display: none !important; } }
+
+/* ---------- graphs ---------- */
+.sim-lab .lab-graphs {
+  display: grid; grid-template-columns: repeat(var(--lab-ngraphs, 1), minmax(0, 1fr)); gap: 10px 16px;
+  padding: 12px 14px 14px; border-top: 1px solid var(--lab-divider);
+}
+.sim-lab .lab-graph { position: relative; margin: 0; min-width: 0; padding: 8px 12px 6px; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--lab-divider); scroll-snap-align: start; }
+.sim-lab .lab-graph-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; margin: 0; }
+.sim-lab .lab-graph-title { min-width: 0; font-family: var(--lab-font-heading); font-weight: 400; font-size: 16px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sim-lab .lab-legend { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sim-lab .lab-legend-item { display: flex; align-items: center; gap: 6px; }
+/* The live value after each legend symbol keeps a fixed width, so the legend does not slide as digits come and go. */
+.sim-lab .lab-legend-item > span:last-child { display: inline-block; min-width: 8ch; }
+.sim-lab .lab-legend-line { width: 12px; height: 2px; }
+.sim-lab .lab-legend .lab-sym { font-size: 15px; }
+.sim-lab .lab-graph-cv { display: block; width: 100%; height: 110px; cursor: crosshair; touch-action: manipulation; }
+/* Narrow: the graphs are a strip to swipe, each one almost the full width. */
+@container lab (max-width: 599px) {
+  .sim-lab .lab-graphs {
+    grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: calc(100% - 28px);
+    overflow-x: auto; overflow-y: hidden; scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding-inline: 10px;
+    padding: 10px 10px 12px; overscroll-behavior-x: contain;
+  }
+  .sim-lab .lab-graphs::-webkit-scrollbar { display: none; }
+  .sim-lab .lab-graphs[style*="--lab-ngraphs: 1;"] { grid-auto-columns: 100%; }
+  .sim-lab .lab-graph-cv { height: 100px; }
+}
+
+/* ---------- settings panel ---------- */
+.sim-lab .lab-panel-head { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 8px 10px 8px 18px; border-bottom: 1px solid var(--lab-divider); font-family: var(--lab-font-heading); font-weight: 400; font-size: 18px; line-height: 1.2; }
+.sim-lab .lab-panel-close { color: var(--lab-text); }
+.sim-lab .lab-sec { display: flex; flex-direction: column; gap: 6px; padding: 10px 18px; }
+.sim-lab .lab-sec + .lab-sec { border-top: 1px solid var(--lab-divider); }
+.sim-lab .lab-sec-title { margin: 0; font-family: var(--lab-font-heading); font-weight: 600; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--lab-a-700); }
+.sim-lab .lab-params { gap: 0; padding-bottom: 6px; }
+.sim-lab .lab-params .lab-sec-title { margin-bottom: 2px; }
+.sim-lab .lab-param { display: flex; flex-direction: column; gap: 2px; padding: 5px 0 6px; border-bottom: 1px solid var(--lab-hairline); }
+.sim-lab .lab-param:last-child { border-bottom: 0; }
+.sim-lab .lab-param-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.sim-lab .lab-param-label { flex: 1 1 auto; min-width: 0; display: flex; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 500; line-height: 1.3; cursor: default; }
+.sim-lab .lab-param-name { min-width: 0; }
+.sim-lab .lab-param-sym { flex: none; font-weight: 700; font-size: 17px; }
+.sim-lab .lab-param .lab-tag { flex: none; font-size: 10px; padding: 2px 7px; letter-spacing: 0.08em; text-transform: uppercase; }
+.sim-lab .lab-param .lab-select { margin-top: 2px; min-height: 30px; padding-block: 3px; }
+.sim-lab .lab-slider { display: flex; align-items: center; gap: 12px; }
+.sim-lab .lab-slider input[type="range"] { flex: 1; min-width: 0; height: 26px; }
+.sim-lab .lab-numbox { display: flex; align-items: center; border: 1px solid var(--lab-divider); background: var(--lab-surface); }
+.sim-lab .lab-numbox input {
+  width: 62px; height: 28px; margin: 0; padding: 0 4px 0 8px; border: 0; background: transparent; color: var(--lab-text);
+  font: 500 14px var(--lab-font-body); font-variant-numeric: tabular-nums; text-align: right; outline: none;
+}
+.sim-lab .lab-numbox:focus-within { border-color: var(--lab-accent); }
+.sim-lab .lab-numbox .lab-unit { min-width: 34px; padding-right: 8px; }
+.sim-lab .lab-toggles { gap: 2px; }
+.sim-lab .lab-toggles .lab-sec-title { margin-bottom: 6px; }
+.sim-lab .lab-check { display: flex; align-items: center; gap: 10px; min-height: 28px; padding: 2px 0; font-size: 14px; line-height: 1.25; cursor: pointer; }
+/* On the page, a lab 640 px and wider: the settings as a band under the controls, the parameters side by
+   side in columns, the presets in the first cell and the display switches on one line below them. */
+@container lab (min-width: 640px) {
+  .sim-lab:not(.is-full):not(.panel-float) .lab-panel-head { display: none; }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-panel-body {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); column-gap: 24px; align-items: start; padding: 4px 16px 8px;
+  }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-sec { padding: 0; }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-sec + .lab-sec { border-top: 0; }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-params { display: contents; }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-params > .lab-sec-title { display: none; }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-param, .sim-lab:not(.is-full):not(.panel-float) .lab-param:last-child { padding: 6px 0; border-bottom: 1px solid var(--lab-hairline); }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-presets { gap: 3px; padding: 6px 0; border-bottom: 1px solid var(--lab-hairline); }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-presets .lab-sec-title { font-size: 11px; line-height: 1.6; }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-presets .lab-select { min-height: 32px; padding-block: 4px; }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-toggles { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0 20px; padding: 6px 0 0; }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-toggles .lab-sec-title { margin: 0; font-size: 11px; }
+  .sim-lab:not(.is-full):not(.panel-float) .lab-toggles .lab-btn-small { margin: 0; min-height: 28px; }
+}
+
+/* ---------- full window: the old app's layout ----------
+   Stage under everything; readouts at the top left; the settings panel a card at the right (with the dock
+   beside it above 1100 px) or a sheet above the dock on a phone; the dock (graphs, status, controls) at the
+   bottom. SimLab's layoutFull sets --fw-*: where the canvas starts and ends, and the graphs' height. */
+.sim-lab.is-full {
+  position: fixed; inset: 0; z-index: 200; display: block; width: auto; height: auto; margin: 0; border: 0;
+  overscroll-behavior: contain; scroll-margin-top: 0;
+}
+.sim-lab.is-full > .corner { display: none; }
+.sim-lab.is-full .lab-stage { position: absolute; inset: 0; display: block; }
+.sim-lab.is-full .lab-hud { position: absolute; top: 16px; left: 16px; right: 16px; padding: 0; flex-wrap: nowrap; pointer-events: none; }
+.sim-lab.is-full .lab-time { pointer-events: auto; }
+.sim-lab.is-full.panel-side .lab-hud { right: 362px; }
+.sim-lab.is-full.is-compact .lab-hud { top: 8px; left: 8px; }
+.sim-lab.is-full.is-phone .lab-hud { right: 8px; }
+.sim-lab.is-full.is-compact .lab-ro { padding: 6px 8px; }
+.sim-lab.is-full.is-compact .lab-ro-val { font-size: 18px; }
+.sim-lab.is-full.is-compact .lab-state { display: none; }
+.sim-lab.is-full .lab-canvas-box { position: absolute; left: 0; top: var(--fw-top, 140px); width: calc(100% - var(--fw-right, 0px)); height: auto; bottom: var(--fw-bottom, 280px); }
+.sim-lab.is-full .lab-dock {
+  position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 4; display: flex; flex-direction: column;
+  border: 1px solid var(--lab-divider); background: var(--lab-bg); box-shadow: var(--lab-shadow-md);
+}
+.sim-lab.is-full.panel-docked .lab-dock { right: 362px; }
+.sim-lab.is-full.is-compact .lab-dock { left: 8px; right: 8px; bottom: 8px; }
+.sim-lab.is-full.is-compact.panel-docked .lab-dock { right: 362px; }
+.sim-lab.is-full .lab-dock > * { order: 0; }
+.sim-lab.is-full .lab-graphs { border-top: 0; padding: 12px 16px 4px; }
+.sim-lab.is-full .lab-graph { padding: 10px 12px 8px; gap: 6px; }
+.sim-lab.is-full .lab-graph-head { flex-direction: column; align-items: stretch; gap: 2px; }
+.sim-lab.is-full .lab-graph-cv { height: var(--fw-gh, 120px); }
+.sim-lab.is-full .lab-status { height: 44px; min-height: 0; }
+.sim-lab.is-full .lab-status-box { padding: 4px 16px; }
+/* In a short window the status line takes no room: it is hidden, and the finish message lies over the
+   bottom edge of the stage instead of pushing the stage smaller when it appears. */
+.sim-lab.is-full.is-short .lab-status { position: absolute; left: 0; right: 0; bottom: 100%; z-index: 2; background: var(--lab-bg); border-bottom: 1px solid var(--lab-divider); }
+.sim-lab.is-full.is-short .lab-status:not(.is-strong) { display: none; }
+.sim-lab.is-full .lab-controls { padding: 10px 14px; }
+.sim-lab.is-full.is-compact .lab-controls { padding: 6px 10px; }
+.sim-lab.is-full .lab-panel {
+  position: absolute; z-index: 5; top: 16px; right: 16px; bottom: calc(var(--fw-dock, 300px) + 8px); width: 330px; max-width: calc(100% - 16px);
+  display: none; flex-direction: column; border: 1px solid var(--lab-divider); background: var(--lab-bg); box-shadow: var(--lab-shadow-md);
+}
+.sim-lab.is-full.panel-open .lab-panel { display: flex; }
+.sim-lab.is-full.panel-docked .lab-panel { bottom: 16px; }
+.sim-lab.is-full.is-phone .lab-panel { top: auto; left: 8px; right: 8px; width: auto; max-height: var(--fw-pmax, 50%); }
+.sim-lab.is-full .lab-panel-head, .sim-lab.panel-float .lab-panel-head { flex: none; padding: 10px 10px 10px 18px; }
+.sim-lab.is-full .lab-panel-body, .sim-lab.panel-float .lab-panel-body { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
+.sim-lab.is-full .lab-sec { padding: 16px 18px; gap: 10px; }
+.sim-lab.is-full .lab-params { padding-bottom: 6px; gap: 0; }
+.sim-lab.is-full .lab-param { padding: 12px 0; gap: 4px; }
+.sim-lab.is-full .lab-check { min-height: 30px; }
+.sim-lab.is-full.is-phone .lab-graphs {
+  grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: calc(100% - 28px);
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding-inline: 10px; padding: 10px 10px 4px;
+}
+.sim-lab.is-full.is-phone .lab-graphs[style*="--lab-ngraphs: 1;"] { grid-auto-columns: 100%; }
+
+/* ---------- loading, failure, toast ---------- */
+.sim-lab .lab-cover { position: absolute; inset: 0; z-index: 8; display: grid; place-items: center; padding: 24px; background: var(--lab-bg); text-align: center; font-family: var(--lab-font-heading); font-weight: 400; font-size: 18px; color: var(--lab-n-700); }
+.sim-lab .lab-cover.is-late { animation: lab-late 0.2s ease-out 0.15s both; }
+.sim-lab .lab-cover-box { display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 44ch; }
+.sim-lab .lab-cover-title { font-size: 24px; line-height: 1.1; color: var(--lab-text); }
+.sim-lab .lab-cover-text { font-family: var(--lab-font-body); font-weight: 400; font-size: 15px; line-height: 1.5; color: var(--lab-n-800); }
+.sim-lab .lab-cover .lab-btn { min-height: 44px; padding: 0 20px; font-size: 15px; }
+@keyframes lab-late { from { opacity: 0; } to { opacity: 1; } }
+.sim-lab .lab-toast {
+  position: absolute; left: 50%; bottom: 12px; z-index: 6; transform: translateX(-50%); max-width: calc(100% - 24px);
+  padding: 8px 14px; background: var(--lab-a-900); color: var(--lab-bg); font-size: 13px; letter-spacing: 0.04em; box-shadow: var(--lab-shadow-md); pointer-events: none;
+}

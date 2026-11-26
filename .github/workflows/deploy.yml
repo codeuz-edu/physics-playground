@@ -1,0 +1,66 @@
+name: Deploy to GitHub Pages
+
+# Every push to main publishes the site. Any branch can also be published by hand:
+# Actions -> Deploy to GitHub Pages -> Run workflow, then pick the branch.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The whole history, so each page's "last updated" date is that of its own last commit.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set site base path
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          if [[ "$REPO_NAME" == *.github.io ]]; then
+            echo "SITE_BASE=/" >> "$GITHUB_ENV"
+          else
+            echo "SITE_BASE=/${REPO_NAME}/" >> "$GITHUB_ENV"
+          fi
+
+      - run: npm ci
+
+      - name: Reuse the encoded photo copies
+        uses: actions/cache@v6
+        with:
+          # scripts/build-photos.mjs encodes only the photos whose content changed since these were made.
+          path: docs/public/photos/sized
+          key: photos-${{ hashFiles('docs/public/photos/*.jpg', 'scripts/build-photos.mjs') }}
+          restore-keys: photos-
+
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

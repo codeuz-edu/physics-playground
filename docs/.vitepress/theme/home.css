@@ -1,0 +1,117 @@
+/* The contents page (CourseHome.vue), in the old site's home-page layout: a large hero, then one
+   section per chapter with its number, name and note, and a grid of simulation cards in blueprint
+   frames. Tokens (--color-*, --font-*) and the .blueprint frame are in style.css. */
+
+/* Colours of the card pictures, read by CourseHome.vue with readColors() from src/ui/canvas.js: the
+   simulations' draw() gets them by these names. Values of COLORS / LIGHT / DARK in the original app. */
+.course-home {
+ --bg: #f2f2f3; --surface: #f2f2f3; --fg: #1d1f20; --muted: #5d5d60; --line: #d4d4d7; --grid: rgba(89, 128, 166, .16); --axis: #7a7a7d;
+ --accent: #5980a6; --pos: #5980a6; --vel: #c2652e; --acc: #b04a7e; --vx: #b08a2c; --vy: #6f5aa8; --current: #2f8a9e; --force: #3f8a5a; --friction: #8a5a2b;
+ --body: #1d2d3d; --track: #e7e7ea; --ghost: #98989b; --warn: #c2414b; --sky-top: #f2f2f3; --sky-bottom: #f2f2f3; --ground: #e7e7ea; --ground-edge: #1d1f20;
+ --hatch: #7a7a7d; --road: #2b2b2d; --shadow: rgba(29, 31, 32, .18); --ball-hi: #ffffff; --iron: #5d5d60; --iron-hi: #d4d4d7; --iron-dark: #2b2b2d;
+ --water: #e3eef8; --water-line: #94bce3; --dot: #d4d4d7; --gridline: #e7e7ea; --cursor: #416180; --hot: #d6ebff;
+ /* The outline behind vector labels (theme.halo in canvas.js), and the canvas text faces as plain
+    font lists (refreshFonts in canvas.js), the same as the lab's. */
+ --halo: rgba(255, 255, 255, .92);
+ --font-body: Barlow, sans-serif;
+ --font-mono: Barlow, sans-serif;
+
+ --home-max: 1320px;
+ --home-button-bg: #416180;
+ --home-button-hover: #2c455d;
+ --home-button-text: #ffffff;
+ color: var(--color-text);
+ font-family: var(--font-body);
+}
+.dark .course-home {
+ --bg: #16191c; --surface: #16191c; --fg: #e8e9ea; --muted: #b7b7ba; --line: #424244; --grid: rgba(148, 188, 227, .14); --axis: #98989b;
+ --accent: #749dc4; --pos: #749dc4; --vel: #e08a55; --acc: #d77aa6; --vx: #d4ae55; --vy: #9d8ad6; --current: #5bb4c7; --force: #6cba86; --friction: #c08a55;
+ --body: #d6ebff; --track: #2b2b2d; --ghost: #7a7a7d; --warn: #e0636b; --sky-top: #16191c; --sky-bottom: #16191c; --ground: #202428; --ground-edge: #e8e9ea;
+ --hatch: #5d5d60; --road: #b7b7ba; --shadow: rgba(0, 0, 0, .45); --ball-hi: #ffffff; --iron: #98989b; --iron-hi: #424244; --iron-dark: #d4d4d7;
+ --water: #1b2a38; --water-line: #416180; --dot: #424244; --gridline: #2b2b2d; --cursor: #94bce3; --hot: #2c455d;
+ --halo: rgba(22, 25, 28, .92);
+
+ --home-button-bg: #749dc4;
+ --home-button-hover: #94bce3;
+ --home-button-text: #16191c;
+}
+
+.course-home h1, .course-home h2, .course-home p, .course-home ul { margin: 0; padding: 0; }
+.course-home ul { list-style: none; }
+.course-home a { text-decoration: none; }
+.home-wrap { box-sizing: border-box; max-width: var(--home-max); margin: 0 auto; padding: 0 clamp(16px, 3vw, 40px); }
+
+/* ---------- hero ---------- */
+.home-hero { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 28px 72px; padding-top: 64px; padding-bottom: 80px; }
+.hero-heading { flex: 1 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.hero-kicker { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-accent-700); }
+.course-home h1 { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: clamp(52px, 7.4vw, 112px); line-height: .88; letter-spacing: -.02em; }
+.hero-accent { color: var(--color-accent); }
+.hero-copy { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 22px; }
+.hero-lead { font-size: 18px; line-height: 1.6; color: var(--color-neutral-800); max-width: 48ch; text-wrap: pretty; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero-note { font-size: 13px; line-height: 1.5; color: var(--color-neutral-700); }
+
+/* Industry buttons: square, Barlow Condensed. The primary one wears the blueprint corners. */
+.home-button {
+ display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 20px; box-sizing: border-box;
+ border: 1px solid var(--color-divider); color: var(--color-text); background: transparent;
+ font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 17px; line-height: 1.2; white-space: nowrap;
+ transition: background-color .15s, border-color .15s;
+}
+.home-button:hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
+.home-button.primary { border-color: var(--home-button-bg); background: var(--home-button-bg); color: var(--home-button-text); }
+.home-button.primary:hover { border-color: var(--home-button-hover); background: var(--home-button-hover); }
+.home-button svg { flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+/* "Davom etiş: <title>" can be long: it ends in "…" and the full text is in the tooltip. */
+.home-button.is-resume { max-width: 100%; min-width: 0; }
+.home-button.is-resume span { overflow: hidden; text-overflow: ellipsis; }
+
+.hero-progress { display: flex; align-items: center; gap: 12px; min-height: 20px; }
+/* The bar takes what the text leaves, up to 160 px, so the text stays on one line on a phone. */
+.progress-track { flex: 1 1 0; min-width: 48px; max-width: 160px; height: 4px; background: var(--color-neutral-300); overflow: hidden; }
+.progress-track span { display: block; height: 100%; background: var(--color-accent); transition: width .3s; }
+.progress-text { font-size: 13px; color: var(--color-neutral-700); font-variant-numeric: tabular-nums; }
+
+/* ---------- chapters ---------- */
+.chapters { display: flex; flex-direction: column; gap: 80px; padding-bottom: 96px; scroll-margin-top: var(--vp-nav-height); }
+.chapter { display: flex; flex-direction: column; gap: 28px; scroll-margin-top: calc(var(--vp-nav-height) + 16px); }
+.chapter-head {
+ display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "number text progress";
+ gap: 0 24px; align-items: end; padding-top: 24px; border-top: 1px solid var(--color-divider);
+}
+.chapter-number { grid-area: number; font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 96px; line-height: .8; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.chapter-text { grid-area: text; display: flex; flex-direction: column; gap: 6px; }
+.chapter-text h2 { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 36px; line-height: 1; letter-spacing: -.015em; border: 0; }
+.chapter-text p { font-size: 16px; line-height: 1.55; color: var(--color-neutral-800); max-width: 62ch; }
+.chapter-progress { grid-area: progress; font-size: 13px; color: var(--color-neutral-700); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chapter-pending { font-size: 14px; color: var(--color-neutral-700); }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 32px 28px; }
+.card-grid > li { min-width: 0; display: flex; }
+.sim-card { flex: 1; min-width: 0; display: flex; flex-direction: column; color: var(--color-text); transition: border-color .15s; }
+.sim-card:hover { border-color: var(--color-accent); color: var(--color-text); }
+.sim-thumb { display: block; width: 100%; aspect-ratio: 16 / 9; background: var(--bg); border-bottom: 1px solid var(--color-divider); }
+.sim-card-body { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 18px; }
+.sim-card-figure { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--color-accent-700); }
+.sim-card-title { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 23px; line-height: 1.1; }
+.sim-card-summary {
+ font-size: 14px; line-height: 1.55; color: var(--color-neutral-800);
+ display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.sim-card-details { margin-top: auto; padding-top: 2px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-size: 12px; line-height: 1.5; color: var(--color-accent-700); }
+.sim-card-opened { display: inline-flex; align-items: center; gap: 4px; color: var(--color-neutral-700); }
+.sim-card-opened svg { width: 14px; height: 14px; fill: none; stroke: var(--color-accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+@media (max-width: 640px) {
+ .home-hero { padding-top: 40px; padding-bottom: 56px; }
+ .hero-lead { font-size: 17px; }
+ .chapters { gap: 56px; }
+ .chapter-head { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "number text" "number progress"; gap: 8px 16px; }
+ .chapter-number { font-size: 64px; align-self: start; }
+ .chapter-text h2 { font-size: 28px; }
+ .chapter-text p { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .home-button, .sim-card, .progress-track span { transition: none; }
+}

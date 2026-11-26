@@ -1,0 +1,201 @@
+[
+ {
+  "number": "01",
+  "slug": "kinematics",
+  "uz": "Kinematika",
+  "sims": [
+   "motion-1d",
+   "projectile",
+   "free-fall",
+   "river-boat",
+   "circular",
+   "graph-match"
+  ]
+ },
+ {
+  "number": "02",
+  "slug": "dynamics",
+  "uz": "Dinamika",
+  "sims": [
+   "push-box",
+   "incline",
+   "third-law",
+   "tension",
+   "connected",
+   "atwood",
+   "lift",
+   "curve",
+   "banked",
+   "satellite",
+   "kepler",
+   "rotation"
+  ]
+ },
+ {
+  "number": "03",
+  "slug": "statics",
+  "uz": "Statika",
+  "sims": [
+   "lever",
+   "center-mass",
+   "equilibrium-types",
+   "pulleys"
+  ]
+ },
+ {
+  "number": "04",
+  "slug": "conservation-laws",
+  "uz": "Saqlaniş qonunlari",
+  "sims": [
+   "work-power",
+   "energy-forms",
+   "energy",
+   "collision",
+   "collision-2d",
+   "rocket",
+   "loop"
+  ]
+ },
+ {
+  "number": "05",
+  "slug": "fluid-mechanics",
+  "uz": "Suyuqliklar mexanikasi",
+  "sims": [
+   "fluid-pressure",
+   "communicating",
+   "hydraulic-press",
+   "archimedes",
+   "floating",
+   "bernoulli"
+  ]
+ },
+ {
+  "number": "06",
+  "slug": "oscillations",
+  "uz": "Tebranişlar",
+  "sims": [
+   "pendulum",
+   "spring"
+  ]
+ },
+ {
+  "number": "07",
+  "slug": "molecular-physics",
+  "uz": "Molekulyar fizika",
+  "sims": [
+   "gas-laws",
+   "molecules",
+   "capillary"
+  ]
+ },
+ {
+  "number": "08",
+  "slug": "thermodynamics",
+  "uz": "Termodinamika",
+  "sims": [
+   "heat-balance",
+   "phase",
+   "carnot"
+  ]
+ },
+ {
+  "number": "09",
+  "slug": "electrostatics",
+  "uz": "Elektrostatika",
+  "sims": [
+   "coulomb",
+   "efield",
+   "rc"
+  ]
+ },
+ {
+  "number": "10",
+  "slug": "direct-current",
+  "uz": "Özgarmas tok",
+  "sims": [
+   "ohm",
+   "full-circuit",
+   "joule"
+  ]
+ },
+ {
+  "number": "11",
+  "slug": "magnetism",
+  "uz": "Magnetizm va elektromagnit induksiya",
+  "sims": [
+   "lorentz",
+   "induction",
+   "rod-rails"
+  ]
+ },
+ {
+  "number": "12",
+  "slug": "alternating-current",
+  "uz": "Özgaruvçan tok",
+  "sims": [
+   "ac-generator",
+   "lc",
+   "transformer"
+  ]
+ },
+ {
+  "number": "13",
+  "slug": "waves-and-sound",
+  "uz": "Tölqinlar va tovuş",
+  "sims": [
+   "wave",
+   "standing",
+   "doppler"
+  ]
+ },
+ {
+  "number": "14",
+  "slug": "geometric-optics",
+  "uz": "Geometrik optika",
+  "sims": [
+   "refraction",
+   "lens",
+   "mirror"
+  ]
+ },
+ {
+  "number": "15",
+  "slug": "wave-optics",
+  "uz": "Tölqin optikasi",
+  "sims": [
+   "young",
+   "grating",
+   "polarization"
+  ]
+ },
+ {
+  "number": "16",
+  "slug": "relativity-and-quantum",
+  "uz": "Nisbiylik nazariyasi va kvant fizikasi",
+  "sims": [
+   "photoeffect",
+   "relativity",
+   "debroglie"
+  ]
+ },
+ {
+  "number": "17",
+  "slug": "atomic-and-nuclear",
+  "uz": "Atom va yadro fizikasi",
+  "sims": [
+   "rutherford",
+   "bohr",
+   "decay"
+  ]
+ },
+ {
+  "number": "18",
+  "slug": "astrophysics",
+  "uz": "Astrofizika",
+  "sims": [
+   "cosmic",
+   "wien",
+   "hubble"
+  ]
+ }
+]

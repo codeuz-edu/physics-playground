@@ -1,0 +1,27 @@
+# Node and VitePress
+node_modules/
+dist/
+docs/.vitepress/cache/
+docs/.vitepress/.temp/
+
+# Generated into the site (see scripts/build-fonts.mjs and scripts/build-photos.mjs)
+docs/.vitepress/theme/fonts/
+docs/public/photos/sized/
+
+# Logs and local environment
+*.log
+.env
+.env.*
+
+# Working notes of coding assistants (plans, specs, ledgers): not part of the site
+.superpowers/
+docs/superpowers/
+.claude/settings.local.json
+
+# Editors
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

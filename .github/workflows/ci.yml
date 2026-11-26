@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Reuse the encoded photo copies
+        uses: actions/cache@v6
+        with:
+          # scripts/build-photos.mjs encodes only the photos whose content changed since these were made.
+          path: docs/public/photos/sized
+          key: photos-${{ hashFiles('docs/public/photos/*.jpg', 'scripts/build-photos.mjs') }}
+          restore-keys: photos-
+
+      - run: npm run build
+
+      - name: Check the size budgets
+        run: npm run budget
